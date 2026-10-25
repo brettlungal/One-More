@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:one_more/ui/core/ui/common_button.dart';
 import 'package:one_more/ui/home/widgets/pulse.dart';
+import 'package:one_more/ui/game/game.dart';
 
 class Home extends StatefulWidget{
   const Home({super.key});
@@ -12,6 +13,7 @@ class Home extends StatefulWidget{
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
   late final AnimationController _controller;
   late final Animation<Offset> _slideAnimation;
+  bool _isPulseAnimating = true;
 
   @override
   void initState(){
@@ -39,44 +41,79 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: SlideTransition(
-          position: _slideAnimation,
-          child: Column(
-            children: [
-              const SizedBox(height: 108),
-              const Text(
-                'ONE',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 70,
-                  fontWeight: FontWeight.w800,
-                  height: 0.85,
+        child: Column(
+          children: [
+            SlideTransition(
+              position: _slideAnimation,
+              child: Column(
+                children: [
+                  const SizedBox(height: 108),
+                  const Text(
+                    'ONE',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 70,
+                      fontWeight: FontWeight.w800,
+                      height: 0.85,
+                    ),
+                  ),
+                  const Text(
+                    'MORE',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 70,
+                      fontWeight: FontWeight.w800,
+                      height: 0.85,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'HOW FAR CAN YOU MAKE IT?',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(height: 80),
+                ],
+              ),
+            ),
+            Pulse(isAnimating: _isPulseAnimating,),
+            SlideTransition(
+              position: _slideAnimation,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 40),
+                child: CommonButton(
+                        onPressed: () async {
+                          setState(() {
+                            _isPulseAnimating = false;
+                          });
+
+                          await _controller.forward();
+
+                          if (!mounted) return;
+
+                          Navigator.of(context).push(
+                            PageRouteBuilder(
+                              transitionDuration: const Duration(milliseconds: 700),
+                              pageBuilder: (context, animation, secondaryAnimation) {
+                                return const Game();
+                              },
+                              transitionsBuilder: (
+                                context,
+                                animation,
+                                secondaryAnimation,
+                                child,
+                              ) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                            ),
+                          );
+                        },
                 ),
               ),
-              const Text(
-                'MORE',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 70,
-                  fontWeight: FontWeight.w800,
-                  height: 0.85,
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'HOW FAR CAN YOU MAKE IT?',
-                style: TextStyle(fontSize: 20),
-              ),
-              const SizedBox(height: 80),
-              Pulse(),
-              const SizedBox(height: 40),
-              CommonButton(
-                onPressed: () {
-                  _controller.forward();
-                },
-              ),
-            ],
-          )
+            ),
+          ],
         ),
       ),
     );

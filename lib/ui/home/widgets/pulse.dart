@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class Pulse extends StatefulWidget{
-  const Pulse({super.key});
+  const Pulse({super.key, this.isAnimating = true});
+
+  final bool isAnimating;
 
   @override
   State<Pulse> createState() => _PulseState();
@@ -23,13 +25,25 @@ class _PulseState extends State<Pulse> with SingleTickerProviderStateMixin{
     super.dispose();
   }
 
-  Widget _buildRing(double delay) {
+  @override
+  void didUpdateWidget(covariant Pulse oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.isAnimating && !oldWidget.isAnimating) {
+      _controller.repeat();
+    } else if (!widget.isAnimating && oldWidget.isAnimating) {
+      _controller.stop();
+    }
+  }
+
+  Widget _buildRing(double delay, bool isAnimating) {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
+        final opacityModifier = isAnimating ? 0.8 : 0;
         final progress = (_controller.value + delay) % 1.0;
         final scale = 1.0 + progress * 3.5;
-        final opacity = (1.0 - progress) * 0.8;
+        final opacity = (1.0 - progress) * opacityModifier;
 
         return Transform.scale(
           scale: scale,
@@ -61,21 +75,24 @@ class _PulseState extends State<Pulse> with SingleTickerProviderStateMixin{
       child: Stack(
         alignment: Alignment.center,
         children: [
-          _buildRing(0.5),
-          _buildRing(1),
-          Container(
-            width: 50,
-            height: 50,
-            decoration: const BoxDecoration(
-              color: Colors.red,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x55FF0000),
-                  blurRadius: 20,
-                  spreadRadius: 4,
-                ),
-              ],
+          _buildRing(0.5, widget.isAnimating),
+          _buildRing(1, widget.isAnimating),
+          Hero(
+            tag: 'game-pulse',
+            child: Container(
+              width: 50,
+              height: 50,
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x55FF0000),
+                    blurRadius: 20,
+                    spreadRadius: 4,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
