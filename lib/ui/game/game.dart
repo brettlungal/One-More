@@ -19,6 +19,7 @@ class _GameState extends State<Game>
 
   final List<Obstacle> _obstacles = [];
   final Random _random = Random();
+  
 
   Duration _lastElapsed = Duration.zero;
 
@@ -26,6 +27,7 @@ class _GameState extends State<Game>
   double _spawnAccumulator = 0;
   double _screenWidth = 0;
   double _screenHeight = 0;
+  int _score = 0;
 
   int _level = 1;
 
@@ -70,7 +72,19 @@ class _GameState extends State<Game>
         obstacle.x -= speed * delta;
       }
 
-      // Remove obstacles that have left the screen.
+      final double scoringLine =
+          (_screenWidth / 2) + (50 / 2);
+
+      // Increment score when obstacles pass the player.
+      for (final obstacle in _obstacles) {
+        if (!obstacle.scored &&
+            obstacle.x + obstacle.width < scoringLine) {
+          obstacle.scored = true;
+          _score++;
+        }
+      }
+
+      // Remove obstacles that have completely left the screen.
       _obstacles.removeWhere(
         (obstacle) => obstacle.x + obstacle.width < 0,
       );
@@ -123,6 +137,19 @@ class _GameState extends State<Game>
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 48,
+                left: 0,
+                right: 0,
+                child: Text(
+                  'SCORE: $_score',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ),
