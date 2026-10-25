@@ -75,7 +75,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
                 ],
               ),
             ),
-            Pulse(isAnimating: _isPulseAnimating,),
+            Pulse(isAnimating: _isPulseAnimating),
             SlideTransition(
               position: _slideAnimation,
               child: Padding(
@@ -109,6 +109,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
                               },
                             ),
                           );
+                          _controller.reverse();
                         },
                 ),
               ),
